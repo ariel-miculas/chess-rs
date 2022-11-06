@@ -72,7 +72,6 @@ struct Piece {
 }
 
 pub trait ChessPiece: Debug {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>>;
     // fn can_move(&mut self, initial_pos: Position, final_pos: Position) -> bool;
     fn draw_piece(&self) -> char;
 }
@@ -199,10 +198,6 @@ impl fmt::Display for Board {
 }
 
 impl ChessPiece for Pawn {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving Pawn");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2659}',
@@ -212,10 +207,6 @@ impl ChessPiece for Pawn {
 }
 
 impl ChessPiece for Knight {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving Knight");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2658}',
@@ -225,10 +216,6 @@ impl ChessPiece for Knight {
 }
 
 impl ChessPiece for Bishop {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving Bishop");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2657}',
@@ -238,10 +225,6 @@ impl ChessPiece for Bishop {
 }
 
 impl ChessPiece for Rook {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving Rook");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2656}',
@@ -251,10 +234,6 @@ impl ChessPiece for Rook {
 }
 
 impl ChessPiece for King {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving King");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2654}',
@@ -264,10 +243,6 @@ impl ChessPiece for King {
 }
 
 impl ChessPiece for Queen {
-    fn get_available_moves(&mut self, board: Board, pos: Position) -> Result<Vec<Position>> {
-        println!("moving Queen");
-        Err(MoveError)
-    }
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2655}',
