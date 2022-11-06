@@ -2,6 +2,7 @@ use chess_game::Board;
 // use chess_game::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 use eframe::egui;
+use eframe::egui::{Color32, Rgba};
 use egui::{Pos2, Rect};
 
 fn main() {
@@ -14,6 +15,9 @@ fn main() {
 }
 
 const CHESS_SQUARE_SIZE: usize = 40;
+const LIGHT_BROWN: Color32 = Color32::from_rgb(239, 218, 180);
+const DARK_BROWN: Color32 = Color32::from_rgb(178, 134, 101);
+const BOARD_COLORS: [Color32; 2] = [LIGHT_BROWN, DARK_BROWN];
 
 #[derive(Default)]
 struct GuiBoard {
@@ -40,6 +44,13 @@ impl eframe::App for GuiBoard {
                         }
                         .to_string(),
                     );
+
+                    let button = if y % 2 == 0 {
+                        button.fill(BOARD_COLORS[x % 2])
+                    } else {
+                        button.fill(BOARD_COLORS[1 - x % 2])
+                    };
+
                     let resp = ui.put(
                         Rect {
                             min: Pos2 {
