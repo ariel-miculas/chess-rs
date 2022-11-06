@@ -24,10 +24,10 @@ pub struct Board {
     pub squares: [[Option<Box<dyn ChessPiece>>; 8]; 8],
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Default, Debug, PartialEq, Eq)]
 pub struct Position {
-    x: usize,
-    y: usize,
+    pub x: usize,
+    pub y: usize,
 }
 
 #[derive(Debug)]

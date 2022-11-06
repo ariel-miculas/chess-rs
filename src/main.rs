@@ -1,8 +1,8 @@
-use chess_game::Board;
+use chess_game::{Board, Position};
 // use chess_game::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 use eframe::egui;
-use eframe::egui::{Color32, Rgba};
+use eframe::egui::Color32;
 use egui::{Pos2, Rect};
 
 fn main() {
@@ -22,13 +22,47 @@ const BOARD_COLORS: [Color32; 2] = [LIGHT_BROWN, DARK_BROWN];
 #[derive(Default)]
 struct GuiBoard {
     pub board: Board,
+    prev_clicked_pos: Option<Position>,
 }
 
 impl GuiBoard {
     fn new_game() -> Self {
-        let mut gui_board = Self::default();
-        gui_board.board = Board::new_game();
-        gui_board
+        GuiBoard {
+            board: Board::new_game(),
+            ..Default::default()
+        }
+    }
+
+    fn handle_clicked(&mut self, pos: Position) {
+        if let Some(prev_clicked_pos) = self.prev_clicked_pos {
+            println!("prev clicked was: {:?}", prev_clicked_pos);
+            self.prev_clicked_pos = None;
+        } else {
+            if self.board.squares[pos.y][pos.x].is_some() {
+                self.prev_clicked_pos = Some(pos);
+            }
+        }
+    }
+
+    fn get_ui_pos(&self, pos: Position) -> Rect {
+        Rect {
+            min: Pos2 {
+                x: (pos.x * CHESS_SQUARE_SIZE) as f32,
+                y: ((7 - pos.y) * CHESS_SQUARE_SIZE) as f32,
+            },
+            max: Pos2 {
+                x: ((pos.x * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
+                y: (((7 - pos.y) * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
+            },
+        }
+    }
+
+    fn get_bg_color(&self, pos: Position) -> Color32 {
+        if pos.y % 2 == 0 {
+            BOARD_COLORS[pos.x % 2]
+        } else {
+            BOARD_COLORS[1 - pos.x % 2]
+        }
     }
 }
 
@@ -37,35 +71,27 @@ impl eframe::App for GuiBoard {
         egui::CentralPanel::default().show(ctx, |ui| {
             for y in 0..8 {
                 for x in 0..8 {
-                    let button = egui::Button::new(
+                    let mut button = egui::Button::new(
                         match self.board.squares[y][x] {
                             Some(ref square) => square.draw_piece(),
                             _ => ' ',
                         }
                         .to_string(),
                     );
+                    let mut bg_color = self.get_bg_color(Position { x, y });
 
-                    let button = if y % 2 == 0 {
-                        button.fill(BOARD_COLORS[x % 2])
-                    } else {
-                        button.fill(BOARD_COLORS[1 - x % 2])
-                    };
+                    if let Some(clicked_pos) = self.prev_clicked_pos {
+                        if clicked_pos == (Position { x, y }) {
+                            bg_color = Color32::GREEN;
+                        }
+                    }
 
-                    let resp = ui.put(
-                        Rect {
-                            min: Pos2 {
-                                x: ((7 - x) * CHESS_SQUARE_SIZE) as f32,
-                                y: ((7 - y) * CHESS_SQUARE_SIZE) as f32,
-                            },
-                            max: Pos2 {
-                                x: (((7 - x) * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
-                                y: (((7 - y) * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
-                            },
-                        },
-                        button,
-                    );
+                    button = button.fill(bg_color);
+
+                    let resp = ui.put(self.get_ui_pos(Position { x, y }), button);
                     if resp.clicked() {
-                        println!("clicked {:?}", resp.id);
+                        self.handle_clicked(Position { x, y });
+                        println!("clicked {} {}", y, x);
                     }
                 }
             }
