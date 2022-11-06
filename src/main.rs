@@ -1,4 +1,5 @@
 use chess_game::{Board, Position};
+use chess_game::ChessPieceTrait;
 // use chess_game::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 use eframe::egui;
@@ -38,7 +39,7 @@ impl GuiBoard {
             println!("prev clicked was: {:?}", prev_clicked_pos);
             self.prev_clicked_pos = None;
         } else {
-            if self.board.squares[pos.y][pos.x].is_some() {
+            if let Some(ref _piece) = self.board.squares[pos.y][pos.x] {
                 self.prev_clicked_pos = Some(pos);
             }
         }

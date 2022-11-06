@@ -1,4 +1,5 @@
 use std::{fmt, fmt::Debug};
+use enum_dispatch::enum_dispatch;
 
 type Result<T> = std::result::Result<T, MoveError>;
 
@@ -21,7 +22,7 @@ impl fmt::Display for MoveError {
 
 #[derive(Default)]
 pub struct Board {
-    pub squares: [[Option<Box<dyn ChessPiece>>; 8]; 8],
+    pub squares: [[Option<ChessPiece>; 8]; 8],
 }
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, Eq)]
@@ -71,10 +72,23 @@ struct Piece {
     color: Color,
 }
 
-pub trait ChessPiece: Debug {
+#[enum_dispatch]
+pub trait ChessPieceTrait: Debug {
     // fn can_move(&mut self, initial_pos: Position, final_pos: Position) -> bool;
     fn draw_piece(&self) -> char;
 }
+
+#[enum_dispatch(ChessPieceTrait)]
+#[derive(Debug)]
+pub enum ChessPiece {
+    Pawn(Pawn),
+    Knight(Knight),
+    Bishop(Bishop),
+    Rook(Rook),
+    Queen(Queen),
+    King(King),
+}
+
 
 impl Piece {
     pub fn new(color: Color) -> Piece {
@@ -97,71 +111,71 @@ impl Board {
 
     pub fn init_board(&mut self) {
         let first_row = &mut self.squares[0];
-        first_row[0] = Some(Box::new(Rook {
+        first_row[0] = Some(ChessPiece::Rook(Rook {
             piece: Piece::new(Color::White),
         }));
-        first_row[1] = Some(Box::new(Knight {
+        first_row[1] = Some(ChessPiece::Knight(Knight {
             piece: Piece::new(Color::White),
         }));
-        first_row[2] = Some(Box::new(Bishop {
+        first_row[2] = Some(ChessPiece::Bishop(Bishop {
             piece: Piece::new(Color::White),
         }));
-        first_row[3] = Some(Box::new(Queen {
+        first_row[3] = Some(ChessPiece::Queen(Queen {
             piece: Piece::new(Color::White),
         }));
-        first_row[4] = Some(Box::new(King {
+        first_row[4] = Some(ChessPiece::King(King {
             piece: Piece::new(Color::White),
         }));
-        first_row[5] = Some(Box::new(Bishop {
+        first_row[5] = Some(ChessPiece::Bishop(Bishop {
             piece: Piece::new(Color::White),
         }));
-        first_row[6] = Some(Box::new(Knight {
+        first_row[6] = Some(ChessPiece::Knight(Knight {
             piece: Piece::new(Color::White),
         }));
-        first_row[7] = Some(Box::new(Rook {
+        first_row[7] = Some(ChessPiece::Rook(Rook {
             piece: Piece::new(Color::White),
         }));
 
         for square in &mut self.squares[1] {
-            *square = Some(Box::new(Pawn {
+            *square = Some(ChessPiece::Pawn(Pawn {
                 piece: Piece::new(Color::White),
             }));
         }
 
         for square in &mut self.squares[6] {
-            *square = Some(Box::new(Pawn {
+            *square = Some(ChessPiece::Pawn(Pawn {
                 piece: Piece::new(Color::Black),
             }));
         }
 
         let last_row = &mut self.squares[7];
-        last_row[0] = Some(Box::new(Rook {
+        last_row[0] = Some(ChessPiece::Rook(Rook {
             piece: Piece::new(Color::Black),
         }));
-        last_row[1] = Some(Box::new(Knight {
+        last_row[1] = Some(ChessPiece::Knight(Knight {
             piece: Piece::new(Color::Black),
         }));
-        last_row[2] = Some(Box::new(Bishop {
+        last_row[2] = Some(ChessPiece::Bishop(Bishop {
             piece: Piece::new(Color::Black),
         }));
-        last_row[3] = Some(Box::new(Queen {
+        last_row[3] = Some(ChessPiece::Queen(Queen {
             piece: Piece::new(Color::Black),
         }));
-        last_row[4] = Some(Box::new(King {
+        last_row[4] = Some(ChessPiece::King(King {
             piece: Piece::new(Color::Black),
         }));
-        last_row[5] = Some(Box::new(Bishop {
+        last_row[5] = Some(ChessPiece::Bishop(Bishop {
             piece: Piece::new(Color::Black),
         }));
-        last_row[6] = Some(Box::new(Knight {
+        last_row[6] = Some(ChessPiece::Knight(Knight {
             piece: Piece::new(Color::Black),
         }));
-        last_row[7] = Some(Box::new(Rook {
+        last_row[7] = Some(ChessPiece::Rook(Rook {
             piece: Piece::new(Color::Black),
         }));
     }
 
-    pub fn add_piece(&mut self, piece: Box<dyn ChessPiece>, pos: Position) -> Result<()> {
+    pub fn add_piece(&mut self, piece: ChessPiece, pos: Position) -> Result<()> {
         self.squares[pos.x][pos.y] = Some(piece);
         Ok(())
     }
@@ -174,6 +188,14 @@ impl Board {
         self.squares[final_position.x][final_position.y] =
             self.squares[initial_position.x][initial_position.y].take();
         Ok(())
+    }
+
+    pub fn get_available_moves(&self, pos: Position) -> Vec<Position> {
+        if let Some(ref _piece) = self.squares[pos.y][pos.x] {
+            todo!("return possible moves!");
+        } else {
+            return Vec::new();
+        }
     }
 }
 
@@ -197,7 +219,7 @@ impl fmt::Display for Board {
     }
 }
 
-impl ChessPiece for Pawn {
+impl ChessPieceTrait for Pawn {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2659}',
@@ -206,7 +228,7 @@ impl ChessPiece for Pawn {
     }
 }
 
-impl ChessPiece for Knight {
+impl ChessPieceTrait for Knight {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2658}',
@@ -215,7 +237,7 @@ impl ChessPiece for Knight {
     }
 }
 
-impl ChessPiece for Bishop {
+impl ChessPieceTrait for Bishop {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2657}',
@@ -224,7 +246,7 @@ impl ChessPiece for Bishop {
     }
 }
 
-impl ChessPiece for Rook {
+impl ChessPieceTrait for Rook {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2656}',
@@ -233,7 +255,7 @@ impl ChessPiece for Rook {
     }
 }
 
-impl ChessPiece for King {
+impl ChessPieceTrait for King {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2654}',
@@ -242,7 +264,7 @@ impl ChessPiece for King {
     }
 }
 
-impl ChessPiece for Queen {
+impl ChessPieceTrait for Queen {
     fn draw_piece(&self) -> char {
         match self.piece.color {
             Color::White => '\u{2655}',
