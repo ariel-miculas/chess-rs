@@ -1,5 +1,4 @@
 use chess_game::{Board, Position};
-use chess_game::ChessPieceTrait;
 // use chess_game::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 use eframe::egui;
@@ -24,6 +23,7 @@ const BOARD_COLORS: [Color32; 2] = [LIGHT_BROWN, DARK_BROWN];
 struct GuiBoard {
     pub board: Board,
     prev_clicked_pos: Option<Position>,
+    available_positions: Vec<Position>,
 }
 
 impl GuiBoard {
@@ -38,9 +38,11 @@ impl GuiBoard {
         if let Some(prev_clicked_pos) = self.prev_clicked_pos {
             println!("prev clicked was: {:?}", prev_clicked_pos);
             self.prev_clicked_pos = None;
+            self.available_positions.clear();
         } else {
-            if let Some(ref _piece) = self.board.squares[pos.y][pos.x] {
+            if let Some(ref _piece) = self.board.squares[pos.get_row()][pos.get_column()] {
                 self.prev_clicked_pos = Some(pos);
+                self.available_positions = self.board.get_available_moves(pos);
             }
         }
     }
@@ -48,21 +50,21 @@ impl GuiBoard {
     fn get_ui_pos(&self, pos: Position) -> Rect {
         Rect {
             min: Pos2 {
-                x: (pos.x * CHESS_SQUARE_SIZE) as f32,
-                y: ((7 - pos.y) * CHESS_SQUARE_SIZE) as f32,
+                x: (pos.get_column() * CHESS_SQUARE_SIZE) as f32,
+                y: ((7 - pos.get_row()) * CHESS_SQUARE_SIZE) as f32,
             },
             max: Pos2 {
-                x: ((pos.x * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
-                y: (((7 - pos.y) * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
+                x: ((pos.get_column() * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
+                y: (((7 - pos.get_row()) * CHESS_SQUARE_SIZE) + CHESS_SQUARE_SIZE) as f32,
             },
         }
     }
 
     fn get_bg_color(&self, pos: Position) -> Color32 {
-        if pos.y % 2 == 0 {
-            BOARD_COLORS[pos.x % 2]
+        if pos.get_row() % 2 == 0 {
+            BOARD_COLORS[pos.get_column() % 2]
         } else {
-            BOARD_COLORS[1 - pos.x % 2]
+            BOARD_COLORS[1 - pos.get_column() % 2]
         }
     }
 }
@@ -70,29 +72,39 @@ impl GuiBoard {
 impl eframe::App for GuiBoard {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            for y in 0..8 {
-                for x in 0..8 {
+            for row in 0..8 {
+                for column in 0..8 {
                     let mut button = egui::Button::new(
-                        match self.board.squares[y][x] {
+                        match self.board.squares[row][column] {
                             Some(ref square) => square.draw_piece(),
                             _ => ' ',
                         }
                         .to_string(),
                     );
-                    let mut bg_color = self.get_bg_color(Position { x, y });
+                    let mut bg_color = self.get_bg_color(Position::try_new(row, column).unwrap());
+
+                    if self
+                        .available_positions
+                        .contains(&Position::try_new(row, column).unwrap())
+                    {
+                        bg_color = Color32::LIGHT_GREEN;
+                    }
 
                     if let Some(clicked_pos) = self.prev_clicked_pos {
-                        if clicked_pos == (Position { x, y }) {
+                        if clicked_pos == (Position::try_new(row, column).unwrap()) {
                             bg_color = Color32::GREEN;
                         }
                     }
 
                     button = button.fill(bg_color);
 
-                    let resp = ui.put(self.get_ui_pos(Position { x, y }), button);
+                    let resp = ui.put(
+                        self.get_ui_pos(Position::try_new(row, column).unwrap()),
+                        button,
+                    );
                     if resp.clicked() {
-                        self.handle_clicked(Position { x, y });
-                        println!("clicked {} {}", y, x);
+                        self.handle_clicked(Position::try_new(row, column).unwrap());
+                        println!("clicked {} {}", row, column);
                     }
                 }
             }
