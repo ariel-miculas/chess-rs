@@ -98,6 +98,23 @@ impl Position {
         let mut column = self.column;
 
         loop {
+            if row == 7 || column == 0 {
+                break;
+            }
+            row += 1;
+            column -= 1;
+            positions.push(Position::try_new(row, column).unwrap());
+        }
+
+        positions
+    }
+
+    pub fn get_secondary_diagonal_up_squares(&self) -> Vec<Position> {
+        let mut positions = Vec::new();
+        let mut row = self.row;
+        let mut column = self.column;
+
+        loop {
             if row == 7 || column == 7 {
                 break;
             }
@@ -109,7 +126,7 @@ impl Position {
         positions
     }
 
-    pub fn get_secondary_diagonal_up_squares(&self) -> Vec<Position> {
+    pub fn get_principal_diagonal_down_squares(&self) -> Vec<Position> {
         let mut positions = Vec::new();
         let mut row = self.row;
         let mut column = self.column;
@@ -126,7 +143,7 @@ impl Position {
         positions
     }
 
-    pub fn get_principal_diagonal_down_squares(&self) -> Vec<Position> {
+    pub fn get_secondary_diagonal_down_squares(&self) -> Vec<Position> {
         let mut positions = Vec::new();
         let mut row = self.row;
         let mut column = self.column;
@@ -136,23 +153,6 @@ impl Position {
                 break;
             }
             row -= 1;
-            column -= 1;
-            positions.push(Position::try_new(row, column).unwrap());
-        }
-
-        positions
-    }
-
-    pub fn get_secondary_diagonal_down_squares(&self) -> Vec<Position> {
-        let mut positions = Vec::new();
-        let mut row = self.row;
-        let mut column = self.column;
-
-        loop {
-            if row == 7 || column == 0 {
-                break;
-            }
-            row += 1;
             column -= 1;
             positions.push(Position::try_new(row, column).unwrap());
         }
