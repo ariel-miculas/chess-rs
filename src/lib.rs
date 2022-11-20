@@ -198,6 +198,22 @@ impl Board {
                             available_moves.push(x)
                         }
                     }
+
+                    available_moves.extend(
+                        p.get_attacking_squares(pos, piece.color)
+                            .into_iter()
+                            .filter_map(|pos| {
+                                self.get_piece(pos).as_ref().map(|p| {
+                                    if p.color != piece.color {
+                                        Some(pos)
+                                    } else {
+                                        None
+                                    }
+                                })
+                            })
+                            .flatten()
+                            .collect::<Vec<Position>>(),
+                    );
                 }
                 ChessPieceType::Rook(_r) => {
                     for square in pos.get_up_squares() {
@@ -483,5 +499,25 @@ impl Pawn {
         } else {
             Position::try_new(pos.get_row() - distance, pos.get_column()).ok()
         }
+    }
+
+    fn get_attacking_squares(&self, pos: Position, color: Color) -> Vec<Position> {
+        let mut attacking_squares = Vec::new();
+        if color == Color::White {
+            if let Some(pos) = pos.get_principal_diagonal_up_squares().get(0) {
+                attacking_squares.push(*pos);
+            }
+            if let Some(pos) = pos.get_secondary_diagonal_up_squares().get(0) {
+                attacking_squares.push(*pos);
+            }
+        } else {
+            if let Some(pos) = pos.get_principal_diagonal_down_squares().get(0) {
+                attacking_squares.push(*pos);
+            }
+            if let Some(pos) = pos.get_secondary_diagonal_down_squares().get(0) {
+                attacking_squares.push(*pos);
+            }
+        }
+        attacking_squares
     }
 }
