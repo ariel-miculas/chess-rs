@@ -244,14 +244,11 @@ impl Board {
                         (2, 1),
                     ];
 
-                    for available_position in available_positions {
-                        pos.try_add(available_position)
-                            .ok()
-                            .filter(|x| {
-                                filter_same_color_collision(self.get_piece(*x), piece.color)
-                            })
-                            .map(|x| available_moves.push(x));
-                    }
+                    available_moves = available_positions
+                        .iter()
+                        .filter_map(|available_position| pos.try_add(*available_position).ok())
+                        .filter(|x| filter_same_color_collision(self.get_piece(*x), piece.color))
+                        .collect::<Vec<Position>>();
                 }
                 ChessPieceType::Bishop(b) => {
                     for square in pos.get_principal_diagonal_up_squares() {
