@@ -101,8 +101,8 @@ impl Position {
             if row == 7 || column == 7 {
                 break;
             }
-            row = row + 1;
-            column = column + 1;
+            row += 1;
+            column += 1;
             positions.push(Position::try_new(row, column).unwrap());
         }
 
@@ -118,8 +118,8 @@ impl Position {
             if row == 0 || column == 7 {
                 break;
             }
-            row = row - 1;
-            column = column + 1;
+            row -= 1;
+            column += 1;
             positions.push(Position::try_new(row, column).unwrap());
         }
 
@@ -135,8 +135,8 @@ impl Position {
             if row == 0 || column == 0 {
                 break;
             }
-            row = row - 1;
-            column = column - 1;
+            row -= 1;
+            column -= 1;
             positions.push(Position::try_new(row, column).unwrap());
         }
 
@@ -152,8 +152,8 @@ impl Position {
             if row == 7 || column == 0 {
                 break;
             }
-            row = row + 1;
-            column = column - 1;
+            row += 1;
+            column -= 1;
             positions.push(Position::try_new(row, column).unwrap());
         }
 

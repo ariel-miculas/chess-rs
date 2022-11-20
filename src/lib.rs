@@ -42,7 +42,6 @@ impl Color {
             *self = Color::Black
         }
     }
-
 }
 
 #[derive(Debug)]
@@ -167,14 +166,9 @@ impl Board {
         Ok(())
     }
 
-    pub fn move_piece(
-        &mut self,
-        initial_position: Position,
-        final_position: Position,
-    ) -> Result<()> {
+    pub fn move_piece(&mut self, initial_position: Position, final_position: Position) {
         self.squares[final_position.get_row()][final_position.get_column()] =
             self.squares[initial_position.get_row()][initial_position.get_column()].take();
-        Ok(())
     }
 
     pub fn get_available_moves(&self, pos: Position) -> Vec<Position> {
@@ -189,16 +183,23 @@ impl Board {
         if let Some(piece) = self.get_piece(pos) {
             match &piece.chess_piece {
                 ChessPieceType::Pawn(p) => {
-                    p.move_up(pos, 1, piece.color)
+                    if let Some(x) = p
+                        .move_up(pos, 1, piece.color)
                         .filter(|x| self.get_piece(*x).is_none())
-                        .map(|x| available_moves.push(x));
+                    {
+                        available_moves.push(x)
+                    }
+
                     if p.get_starting_row(piece.color) == pos.get_row() {
-                        p.move_up(pos, 2, piece.color)
+                        if let Some(x) = p
+                            .move_up(pos, 2, piece.color)
                             .filter(|x| self.get_piece(*x).is_none())
-                            .map(|x| available_moves.push(x));
+                        {
+                            available_moves.push(x)
+                        }
                     }
                 }
-                ChessPieceType::Rook(r) => {
+                ChessPieceType::Rook(_r) => {
                     for square in pos.get_up_squares() {
                         match self.get_piece(square) {
                             Some(p) => {
@@ -244,7 +245,7 @@ impl Board {
                         }
                     }
                 }
-                ChessPieceType::Knight(k) => {
+                ChessPieceType::Knight(_k) => {
                     let available_positions = vec![
                         (-2, -1),
                         (-2, 1),
@@ -262,7 +263,7 @@ impl Board {
                         .filter(|x| filter_same_color_collision(self.get_piece(*x), piece.color))
                         .collect::<Vec<Position>>();
                 }
-                ChessPieceType::Bishop(b) => {
+                ChessPieceType::Bishop(_b) => {
                     for square in pos.get_principal_diagonal_up_squares() {
                         match self.get_piece(square) {
                             Some(p) => {
@@ -308,7 +309,7 @@ impl Board {
                         }
                     }
                 }
-                ChessPieceType::Queen(q) => {
+                ChessPieceType::Queen(_q) => {
                     for square in pos.get_up_squares() {
                         match self.get_piece(square) {
                             Some(p) => {
@@ -398,7 +399,7 @@ impl Board {
                         }
                     }
                 }
-                ChessPieceType::King(k) => {
+                ChessPieceType::King(_k) => {
                     for square in pos.get_surrounding_squares() {
                         match self.get_piece(square) {
                             Some(p) => {
@@ -410,7 +411,6 @@ impl Board {
                         }
                     }
                 }
-                _ => {}
             }
         }
         available_moves
@@ -440,27 +440,27 @@ impl fmt::Display for Board {
 impl ChessPiece {
     pub fn draw_piece(&self) -> char {
         match &self.chess_piece {
-            ChessPieceType::Pawn(p) => match self.color {
+            ChessPieceType::Pawn(_p) => match self.color {
                 Color::White => '\u{2659}',
                 Color::Black => '\u{265F}',
             },
-            ChessPieceType::Knight(p) => match self.color {
+            ChessPieceType::Knight(_k) => match self.color {
                 Color::White => '\u{2658}',
                 Color::Black => '\u{265E}',
             },
-            ChessPieceType::Bishop(p) => match self.color {
+            ChessPieceType::Bishop(_b) => match self.color {
                 Color::White => '\u{2657}',
                 Color::Black => '\u{265D}',
             },
-            ChessPieceType::Rook(p) => match self.color {
+            ChessPieceType::Rook(_r) => match self.color {
                 Color::White => '\u{2656}',
                 Color::Black => '\u{265C}',
             },
-            ChessPieceType::King(p) => match self.color {
+            ChessPieceType::King(_k) => match self.color {
                 Color::White => '\u{2654}',
                 Color::Black => '\u{265A}',
             },
-            ChessPieceType::Queen(p) => match self.color {
+            ChessPieceType::Queen(_q) => match self.color {
                 Color::White => '\u{2655}',
                 Color::Black => '\u{265B}',
             },
