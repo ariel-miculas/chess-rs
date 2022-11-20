@@ -37,6 +37,9 @@ impl GuiBoard {
     fn handle_clicked(&mut self, pos: Position) {
         if let Some(prev_clicked_pos) = self.prev_clicked_pos {
             println!("prev clicked was: {:?}", prev_clicked_pos);
+            if self.available_positions.contains(&pos) {
+                self.board.move_piece(prev_clicked_pos, pos);
+            }
             self.prev_clicked_pos = None;
             self.available_positions.clear();
         } else {
