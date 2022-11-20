@@ -1,4 +1,4 @@
-use chess_game::{Board, Position};
+use chess_game::{Board, Color, Position};
 // use chess_game::{Bishop, King, Knight, Pawn, Queen, Rook};
 
 use eframe::egui;
@@ -24,6 +24,7 @@ struct GuiBoard {
     pub board: Board,
     prev_clicked_pos: Option<Position>,
     available_positions: Vec<Position>,
+    turn: Color,
 }
 
 impl GuiBoard {
@@ -39,11 +40,12 @@ impl GuiBoard {
             println!("prev clicked was: {:?}", prev_clicked_pos);
             if self.available_positions.contains(&pos) {
                 self.board.move_piece(prev_clicked_pos, pos);
+                self.turn.switch();
             }
             self.prev_clicked_pos = None;
             self.available_positions.clear();
-        } else {
-            if let Some(ref _piece) = self.board.squares[pos.get_row()][pos.get_column()] {
+        } else if let Some(ref piece) = self.board.get_piece(pos) {
+            if piece.color == self.turn {
                 self.prev_clicked_pos = Some(pos);
                 self.available_positions = self.board.get_available_moves(pos);
             }

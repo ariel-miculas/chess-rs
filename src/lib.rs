@@ -27,10 +27,22 @@ pub struct Board {
 mod position;
 pub use position::Position;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Default)]
 pub enum Color {
     Black,
+    #[default]
     White,
+}
+
+impl Color {
+    pub fn switch(&mut self) {
+        if *self == Color::Black {
+            *self = Color::White
+        } else {
+            *self = Color::Black
+        }
+    }
+
 }
 
 #[derive(Debug)]
@@ -65,7 +77,7 @@ pub enum ChessPieceType {
 }
 
 pub struct ChessPiece {
-    color: Color,
+    pub color: Color,
     chess_piece: ChessPieceType,
 }
 
