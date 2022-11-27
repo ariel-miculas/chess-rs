@@ -171,6 +171,104 @@ impl Board {
             self.squares[initial_position.get_row()][initial_position.get_column()].take();
     }
 
+    fn get_orthogonal_moves(&self, piece: &ChessPiece, pos: Position) -> Vec<Position> {
+        let mut available_moves = Vec::new();
+        for square in pos.get_left_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_right_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_up_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_down_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        available_moves
+    }
+
+    fn get_diagonal_moves(&self, piece: &ChessPiece, pos: Position) -> Vec<Position> {
+        let mut available_moves = Vec::new();
+        for square in pos.get_principal_diagonal_up_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_principal_diagonal_down_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_secondary_diagonal_up_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        for square in pos.get_secondary_diagonal_down_squares() {
+            match self.get_piece(square) {
+                Some(p) => {
+                    if p.color != piece.color {
+                        available_moves.push(square)
+                    }
+                    break;
+                }
+                None => available_moves.push(square),
+            }
+        }
+        available_moves
+    }
+
     pub fn get_available_moves(&self, pos: Position) -> Vec<Position> {
         let mut available_moves = Vec::<Position>::new();
         fn filter_same_color_collision(chess_piece: &Option<ChessPiece>, col: Color) -> bool {
@@ -216,50 +314,7 @@ impl Board {
                     );
                 }
                 ChessPieceType::Rook(_r) => {
-                    for square in pos.get_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_left_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_right_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
+                    available_moves.append(&mut self.get_orthogonal_moves(piece, pos));
                 }
                 ChessPieceType::Knight(_k) => {
                     let available_positions = vec![
@@ -280,140 +335,11 @@ impl Board {
                         .collect::<Vec<Position>>();
                 }
                 ChessPieceType::Bishop(_b) => {
-                    for square in pos.get_principal_diagonal_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_principal_diagonal_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_secondary_diagonal_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_secondary_diagonal_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
+                    available_moves.append(&mut self.get_diagonal_moves(piece, pos));
                 }
                 ChessPieceType::Queen(_q) => {
-                    for square in pos.get_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_left_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_right_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_principal_diagonal_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_principal_diagonal_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_secondary_diagonal_up_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
-                    for square in pos.get_secondary_diagonal_down_squares() {
-                        match self.get_piece(square) {
-                            Some(p) => {
-                                if p.color != piece.color {
-                                    available_moves.push(square)
-                                }
-                                break;
-                            }
-                            None => available_moves.push(square),
-                        }
-                    }
+                    available_moves.append(&mut self.get_orthogonal_moves(piece, pos));
+                    available_moves.append(&mut self.get_diagonal_moves(piece, pos));
                 }
                 ChessPieceType::King(_k) => {
                     for square in pos.get_surrounding_squares() {
