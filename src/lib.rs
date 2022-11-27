@@ -35,11 +35,11 @@ pub enum Color {
 }
 
 impl Color {
-    pub fn switch(&mut self) {
+    pub fn switch(&self) -> Color {
         if *self == Color::Black {
-            *self = Color::White
+            Color::White
         } else {
-            *self = Color::Black
+            Color::Black
         }
     }
 }
@@ -269,6 +269,19 @@ impl Board {
         available_moves
     }
 
+    fn get_attacking_squares(&self, pos: Position, color: Color) -> Vec<Position> {
+        let mut moves = Vec::<Position>::new();
+        if let Some(piece) = self.get_piece(pos) {
+            if piece.color == color {
+                moves.extend(match &piece.chess_piece {
+                    ChessPieceType::Pawn(p) => p.get_attacking_squares(pos, piece.color),
+                    _ => self.get_available_moves(pos),
+                });
+            }
+        }
+        moves
+    }
+
     pub fn get_available_moves(&self, pos: Position) -> Vec<Position> {
         let mut available_moves = Vec::<Position>::new();
         fn filter_same_color_collision(chess_piece: &Option<ChessPiece>, col: Color) -> bool {
@@ -356,6 +369,41 @@ impl Board {
             }
         }
         available_moves
+    }
+
+    fn get_king(&self, color: Color) -> Result<Position> {
+        for row in self.squares.iter().enumerate() {
+            for column in self.squares[row.0].iter().enumerate() {
+                let position = Position::try_new(row.0, column.0).unwrap();
+                if let Some(piece) = self.get_piece(position) {
+                    if let ChessPieceType::King(_) = piece.chess_piece {
+                        if piece.color == color {
+                            return Ok(position);
+                        }
+                    }
+                }
+            }
+        }
+        // this is actually an internal error
+        Err(MoveError)
+    }
+
+    pub fn is_king_in_check(&self, color: Color) -> Option<Position> {
+        let king_position = self.get_king(color).unwrap();
+
+        for row in self.squares.iter().enumerate() {
+            for column in self.squares[row.0].iter().enumerate() {
+                let position = Position::try_new(row.0, column.0).unwrap();
+                if self
+                    .get_attacking_squares(position, color.switch())
+                    .contains(&king_position)
+                {
+                    return Some(king_position);
+                }
+            }
+        }
+
+        None
     }
 }
 

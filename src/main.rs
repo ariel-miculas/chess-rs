@@ -24,6 +24,7 @@ struct GuiBoard {
     pub board: Board,
     prev_clicked_pos: Option<Position>,
     available_positions: Vec<Position>,
+    checked_king: Option<Position>,
     turn: Color,
 }
 
@@ -40,7 +41,9 @@ impl GuiBoard {
             println!("prev clicked was: {:?}", prev_clicked_pos);
             if self.available_positions.contains(&pos) {
                 self.board.move_piece(prev_clicked_pos, pos);
-                self.turn.switch();
+                self.turn = self.turn.switch();
+
+                self.checked_king = self.board.is_king_in_check(self.turn);
             }
             self.prev_clicked_pos = None;
             self.available_positions.clear();
@@ -86,29 +89,30 @@ impl eframe::App for GuiBoard {
                         }
                         .to_string(),
                     );
-                    let mut bg_color = self.get_bg_color(Position::try_new(row, column).unwrap());
+                    let current_position = Position::try_new(row, column).unwrap();
+                    let mut bg_color = self.get_bg_color(current_position);
 
-                    if self
-                        .available_positions
-                        .contains(&Position::try_new(row, column).unwrap())
-                    {
+                    if self.available_positions.contains(&current_position) {
                         bg_color = Color32::LIGHT_GREEN;
                     }
 
+                    if let Some(check) = self.checked_king {
+                        if check == current_position {
+                            bg_color = Color32::LIGHT_RED;
+                        }
+                    }
+
                     if let Some(clicked_pos) = self.prev_clicked_pos {
-                        if clicked_pos == (Position::try_new(row, column).unwrap()) {
+                        if clicked_pos == (current_position) {
                             bg_color = Color32::GREEN;
                         }
                     }
 
                     button = button.fill(bg_color);
 
-                    let resp = ui.put(
-                        self.get_ui_pos(Position::try_new(row, column).unwrap()),
-                        button,
-                    );
+                    let resp = ui.put(self.get_ui_pos(current_position), button);
                     if resp.clicked() {
-                        self.handle_clicked(Position::try_new(row, column).unwrap());
+                        self.handle_clicked(current_position);
                         println!("clicked {} {}", row, column);
                     }
                 }
