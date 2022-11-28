@@ -19,7 +19,7 @@ impl fmt::Display for MoveError {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Board {
     pub squares: [[Option<ChessPiece>; 8]; 8],
 }
@@ -44,28 +44,28 @@ impl Color {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Pawn;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Knight;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Queen;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct King;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Rook;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Bishop;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Piece;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ChessPieceType {
     Pawn(Pawn),
     Knight(Knight),
@@ -75,6 +75,7 @@ pub enum ChessPieceType {
     King(King),
 }
 
+#[derive(Clone)]
 pub struct ChessPiece {
     pub color: Color,
     chess_piece: ChessPieceType,
@@ -275,14 +276,48 @@ impl Board {
             if piece.color == color {
                 moves.extend(match &piece.chess_piece {
                     ChessPieceType::Pawn(p) => p.get_attacking_squares(pos, piece.color),
-                    _ => self.get_available_moves(pos),
+                    _ => self.get_moves_ignoring_check(pos),
                 });
             }
         }
         moves
     }
 
-    pub fn get_available_moves(&self, pos: Position) -> Vec<Position> {
+    pub fn move_piece_on_shadow_board(
+        &self,
+        initial_position: Position,
+        final_position: Position,
+    ) -> Self {
+        let mut shadow_board = self.clone();
+        shadow_board.move_piece(initial_position, final_position);
+        shadow_board
+    }
+
+    pub fn filter_moves_in_check(
+        &self,
+        color: Color,
+        original_position: Position,
+        mut positions: Vec<Position>,
+    ) -> Vec<Position> {
+        positions.retain(|&possible_possition| {
+            let shadow_board =
+                self.move_piece_on_shadow_board(original_position, possible_possition);
+            shadow_board.is_king_in_check(color).is_none()
+        });
+
+        positions
+    }
+
+    pub fn get_available_moves(&mut self, pos: Position) -> Vec<Position> {
+        self.get_piece(pos)
+            .as_ref()
+            .map(|piece| {
+                self.filter_moves_in_check(piece.color, pos, self.get_moves_ignoring_check(pos))
+            })
+            .unwrap_or_else(Vec::<Position>::new)
+    }
+
+    pub fn get_moves_ignoring_check(&self, pos: Position) -> Vec<Position> {
         let mut available_moves = Vec::<Position>::new();
         fn filter_same_color_collision(chess_piece: &Option<ChessPiece>, col: Color) -> bool {
             match chess_piece {
